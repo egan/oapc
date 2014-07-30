@@ -942,4 +942,4 @@ FREND:
 clr c
 ret
 
-; vim: filetype=tasm
+; vim: filetype=tasm: tabstop=4:
