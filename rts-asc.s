@@ -469,25 +469,22 @@ ret
 ; subroutine CADD16
 ; 16-Bit Signed (2's Complement) Addition
 ;
-; input: r1, r0 = X
-; r3, r2 = Y
+; inputs: r1, r0 = X
+;         r3, r2 = Y
 ;
 ; output: r1, r0 = signed sum S = X + Y
-; Carry C is set if the result (S) is out of range
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
 ;org 8670
 CADD16:
-; orl PSW, #0x18 ; Register Bank 3
-mov a, r0 ; load X low byte into acc
-add a, r2 ; add Y low byte
-mov r0, a ; put result in Z low byte
-mov a, r1 ; load X high byte into acc
-addc a, r3 ; add Y high byte with carry
-mov r1, a ; save result in Z high byte
-;mov C, OV
+orl psw, #0x18
+mov a, r0	; Add low bytes together.
+add a, r2
+mov r0, a	; Save result in S low byte.
+mov a, r1	; Add high bytes together with carry.
+addc a, r3
+mov r1, a	; Save result in S high byte.
 clr C
 ret
 
@@ -495,222 +492,217 @@ ret
 ; subroutine CSUB16
 ; 16-Bit Signed (2's Complement) Subtraction
 ;
-; input: r1, r0 = X
-; r3, r2 = Y
+; inputs: r1, r0 = X
+;         r3, r2 = Y
 ;
 ; output: r1, r0 = signed difference D = X - Y
-; Carry C is set if the result (D) is out of range.
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
 ;org 8690
-CSUB16: orl psw, #0x18 ; Register Bank 3
-mov a, r0 ; load X low byte into acc
-clr C ; clear carry flag
-subb a, r2 ; subract Y low byte
-mov r0, a ; put result in Z low byte
-mov a, r1 ; load X high into accumulator
-subb a, r3 ; subtract Y high with borrow
-mov r1, a ; save result in Z high byte
-;mov C, OV
+CSUB16:
+orl psw, #0x18
+clr C
+mov a, r0	; Subtract low bytes.
+subb a, r2
+mov r0, a	; Save result in D low byte.
+mov a, r1	; Subtract high bytes with borrow.
+subb a, r3
+mov r1, a	; Save result in D high byte.
 clr C
 ret
+
 ;====================================================================
 ; subroutine MUL16
-; 16-Bit x 16-Bit to 32-Bit Product Signed Multiply
-; 2's Complement format
+; 16-Bit Signed (2's Complement) Multiplication to 32-Bit Product
+; with Sign Flag
 ;
-; input: r1, r0 = multiplicand X
-; r3, r2 = multiplier Y
+; inputs: r1, r0 = X
+;         r3, r2 = Y
 ;
-; output: r3, r2, r1, r0 = product P = X x Y
+; output: r3, r2, r1, r0 = product magnitude P = |X x Y|
+;         MSIGNALL = sign(P): 1 if negative
 ;
 ; calls: UMUL16, Cr0r1, Cr2r3, Mr0r3
 ;
-; alters: acc, C, Bits B.0 & B.1
+; alters: acc, C, OV, MSIGN0, MSIGN1, MSIGNALL, register bank 3
 ;====================================================================
 ;org 86e0
 MUL16:
-
-orl PSW, #0x18 ; Register Bank 3
-clr MSIGNALL ;
-lcall Cr0r1 ; 2's comp -> Mag/Sign
-lcall Cr2r3 ; 2's comp -> Mag/Sign
-lcall UMUL16
-lcall Mr0r3 ; Mag/Sign -> 2's Comp
-;lcall FRound ;
+orl psw, #0x18
+clr MSIGNALL	; Reset product sign flag.
+lcall Cr0r1		; Find magnitude and sign of multiplicand X.
+lcall Cr2r3		; Find magnitude and sign of multiplier Y.
+lcall UMUL16	; Perform unsigned multiplication of |X| x |Y|.
+lcall Mr0r3		; Find sign of product P.
+;lcall FRound
 ret
 
 ;====================================================================
 ; subroutine UMUL16
-; 16-Bit x 16-Bit to 32-Bit Product Unsigned Multiply
+; 16-Bit Unsigned Multiplication to 32-Bit Product
 ;
-; input: r1, r0 = multiplicand X
-; r3, r2 = multiplier Y
+; inputs: r1, r0 = |X|
+;         r3, r2 = |Y|
 ;
-; output: r3, r2, r1, r0 = product P = X x Y
+; output: r3, r2, r1, r0 = product P = |X| x |Y|
 ;
-; alters: acc, C
+; alters: acc, C, OV, register bank 3
 ;====================================================================
 ;org 86d0
-UMUL16: push B
+UMUL16:
+orl psw, #0x18
+push b		; Save extra registers we will use to stack.
 push dpl
-mov a, r0
+mov a, r0	; Multiply XL x YL.
 mov b, r2
-mul ab ; multiply XL x YL
-push acc ; stack result low byte
-push b ; stack result high byte
-mov a, r0
+mul ab
+push acc	; Stack result low byte.
+push b		; Stack result high byte.
+mov a, r0	; Multiply XL x YH.
 mov b, r3
-mul ab ; multiply XL x YH
-pop 18H
-add a, r0
+mul ab
+pop 18H		; Pop to R0.
+add a, r0	; Add result low byte to first result high byte.
 mov r0, a
 clr a
-addc a, b
-mov dpl, a
-mov a, r2
+addc a, b	; Add carry to result high byte.
+mov dpl, a	; Store carried result high byte in DPL.
+mov a, r2	; Multiple XH x YL.
 mov b, r1
-mul ab ; multiply XH x YL
-add a, r0
+mul ab
+add a, r0	; Add result low byte to R0.
 mov r0, a
 mov a, dpl
-addc a, b
+addc a, b	; Add result high byte to DPL.
 mov dpl, a
 clr a
-addc a, #0
-mov r4, acc ; save intermediate carry
-mov a, r3
+addc a, #0	; Carry and save to R4.
+mov r4, acc
+mov a, r3	; Multiply XH x Yh.
 mov b, r1
-mul ab ; multiply XH x YH
-add a, dpl
-mov r2, a
-mov acc, r4 ; retrieve carry
+mul ab
+add a, dpl	; Add result low byte to DPL.
+mov r2, a	; Save product 3rd byte.
+mov acc, r4 ; Retrieve carry and add to result high byte.
 addc a, b
-mov r3, a
-mov r1, 18H
-pop 18H ; retrieve result low byte
-pop dpl
-pop B
+mov r3, a	; Save product high byte.
+mov r1, 18H	; Save product second byte from R0.
+pop 18H		; Retrieve product low byte.
+pop dpl		; Restore registers.
+pop b
 ret
 
 ;===================================================================
 ; subroutine Cr0r1
-; 16-Bit 2's Complement -> magnitude / Sign Bit Conversion
+; 16-Bit 2's Complement Magnitude and Sign
 ;
-; input: r1, r0 = signed word
+; inputs: r1, r0 = X
 ;
-; output: r1, r0 = magnitude
-; Bit 21H.4 = sign ( is set if negative number)
+; output: r1, r0 = |X|
+;         MSIGN1 = sign(X): 1 if negative
 ;
-; alters: acc, C
+; alters: acc, C, MSIGN1, register bank 3
 ;===================================================================
 ;org 8710
-Cr0r1: mov a, r1 ; high byte into accumulator
-jb acc.7, c0a ; negative if bit 7 is 1
-clr MSIGN1 ; clear sign bit if 'positive'
-ret ; done
+Cr0r1:
+orl psw, #0x18
+mov a, r1
+jb acc.7, c0a	; Negative if high byte bit 7 is 1.
+clr MSIGN1		; Clear sign bit if positive.
+ret				; Done.
 
-c0a: setb MSIGN1
-mov a, r0 ; number is negative
-cpl a ; complement
-add a, #1 ; and add +1
-mov r0, a
-mov a, r1 ; get next byte
-cpl a ; complement
-addc a, #0
-mov r1, a
+c0a:
+setb MSIGN1		; Set sign bit because negative.
+mov a, r0		; 1's complement low byte.
+cpl a
+add a, #1		; And add 1 to do 2's complement.
+mov r0, a		; Save result low byte.
+mov a, r1		; 2's complement high byte.
+cpl a
+addc a, #0		; With carry from low byte.
+mov r1, a		; Save result high byte.
 ret
 
 ;====================================================================
 ; subroutine Cr2r3
-; 16-Bit 2's Complement -> magnitude / Sign Bit Conversion
+; 16-Bit 2's Complement Magnitude and Sign
 ;
-; input: r3, r2 = signed word
+; inputs: r3, r2 = Y
 ;
-; output: r3, r2 = magnitude
-; Bit 21H.3 = sign (set if negative number)
+; output: r3, r2 = |Y|
+;         MSIGN0 = sign(X): 1 if negative
 ;
-; alters: acc, C
+; alters: acc, C, MSIGN0, register bank 3
 ;====================================================================
 ;org 8736
-Cr2r3: mov a, r3 ; read high into accumulator
-jb acc.7, c1a ; negative if bit 7 is 1
-clr MSIGN0 ; clear sign bit if 'positive'
-ret ; done
+Cr2r3:
+orl psw, #0x18
+mov a, r3
+jb acc.7, c1a	; Negative if high byte bit 7 is 1.
+clr MSIGN0		; Clear sign bit if positive.
+ret				; Done.
 
-c1a: setb MSIGN0 ; set sign flag
-mov a, r2 ; number is negative
-cpl a ; complement
-add a, #1 ; and add +1
-mov r2, a
-mov a, r3 ; get next byte
-cpl a ; complement
-addc a, #0
-mov r3, a
+c1a:
+setb MSIGN0		; Set sign bit because positive.
+mov a, r2		; 1's complement low byte.
+cpl a
+add a, #1		; And add 1 to do 2's complement.
+mov r2, a		; Save result low byte.
+mov a, r3		; 2's complement high byte.
+cpl a
+addc a, #0		; With carry from low byte.
+mov r3, a		; Save result high byte.
 ret
+
 ;====================================================================
 ; subroutine C2Com
-; 16-magnitude / Sign Bit-> 2's Complement Conversion
+; 16-Bit 2's Complement Operation
 ;
-; input: r1, r0 = magnitude / Sign Bit
+; inputa: r1, r0 = X
 ;
-; output: r1, r0 = 2's Complement Conversion
+; output: r1, r0 = 2's(X)
 ;
 ;
-; alters: acc, C
+; alters: acc, C, register bank 3
 ;====================================================================
-
+; org XXXX
 C2Comp:
-mov a, r0 ; number is negative
-cpl a ; complement
-add a, #1 ; and add +1
-mov r0, a
-mov a, r1 ; get next byte
-cpl a ; complement
-addc a, #0h0
-mov r1, a
+orl psw, #0x18
+mov a, r0	; 1's complement low byte.
+cpl a
+add a, #1	; And add 1 to do 2's complement.
+mov r0, a	; Save result low byte.
+mov a, r1	; 2's complement high byte.
+cpl a
+addc a, #0	; With carry from low byte.
+mov r1, a	; Save result high byte.
 ret
 
 ;====================================================================
 ; subroutine Mr0r3
-; 32-Bit magnitude / Sign Bit -> 2's Complement Conversion
+; Sign bit multiplication.
 ;
-; input: r3, r2, r1, r0 = magnitude
-; Bits 21H & 22H = sign bits of operands X and Y
-; (set if negative)
+; inputs: MSIGN1 = sign(X): 1 if negative
+;         MSIGN0 = sign(Y)
 ;
-; output: r3, r2, r1, r0 = signed word
+; output: MSIGNALL = sign(X x Y)
 ;
-; alters: acc, C
+; alters: acc, C, MSIGNALL
 ;====================================================================
 ;org 8760
-Mr0r3: jb MSIGN1 , Mr0r3b ; test X sign
-jb MSIGN0, Mr0r3a ; test Y sign
-ret
+Mr0r3:
+jb MSIGN1, Mr0r3b	; Test if X or Y are negative.
+jb MSIGN0, Mr0r3a
+ret					; Done if X and Y are positive.
 
-Mr0r3b: jnb MSIGN0, Mr0r3a
-ret
+Mr0r3b:
+jnb MSIGN0, Mr0r3a	; Test if Y is negative.
+ret					; Done if X and Y are negative.
 
 Mr0r3a:
-setb MSIGNALL ;
-;mov a, r0 ; negate number
-; cpl a ; complement
-;add a, #1 ; and add +1
-;mov r0, a
-;mov a, r1 ; get next byte
-;cpl a ; complement
-; addc a, #0
-; mov r1, a
-;mov a, r2 ; get next byte
-;cpl a ; complement
-;addc a, #0
-;mov r2, a
-;mov a, r3 ; get next byte
-;cpl a ; complement
-;addc a, #0
-; mov r3, a
-ret ; done
+setb MSIGNALL		; Set sign bit if X xor Y are negative.
+ret
 
 ;====================================================================
 ;16-Bit 2's Complement -> 32-Bit 2's Complement Conversion
