@@ -770,7 +770,7 @@ ret
 ;====================================================================
 ;org 8670
 CSUB32:
-orl PSW, #0x18
+orl psw, #0x18
 clr C
 mov a, r4	; Subtract low bytes.
 subb a, r0
@@ -803,7 +803,7 @@ orl psw, #0x18
 mov r2, #0x00		; Pad high byte with zeros.
 mov a, r1
 jnb acc.7, CC24End	; Check sign of input.
-mov r2,#0xFF		; Pad high byte with ones because negative.
+mov r2, #0xFF		; Pad high byte with ones because negative.
 
 CC24End:			; Done because positive.
 ret
@@ -850,7 +850,7 @@ ret
 ;====================================================================
 ;org XXXX
 CSUB24:
-orl PSW, #0x18
+orl psw, #0x18
 clr C
 mov a, r4	; Subtract low bytes.
 subb a, r0
@@ -879,7 +879,7 @@ ret
 ;====================================================================
 ;org 8670
 FRound:
-orl PSW, #0x18
+orl psw, #0x18
 clr C
 mov a, r3				; Check if positive.
 jnb acc.7, FRPositive
