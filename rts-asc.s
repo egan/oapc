@@ -252,7 +252,7 @@ mov DXCL,r0
 
 mov r3,DABSH
 mov r2,DABSL
-lcall ADD16
+lcall CADD16
 mov DABSH,r1
 mov DABSL,r0
 mov a, RDABSEN
@@ -308,7 +308,7 @@ jnb MCDIR ,PlusDir ;
 lcall CSUB16 ;-dir
 sjmp OutPEX
 PlusDir:	;+dir
-lcall ADD16
+lcall CADD16
 OutPEX:
 mov PEXH,r1
 mov PEXL,r0
@@ -380,7 +380,7 @@ mov r0,#0FFh	;VELX is Positive
 mov r1,#07Fh
 mov r2,VELXL
 mov r3,VELXH
-lcall ADD16
+lcall CADD16
 sjmp WROutput
 VELNEG:	;VELX is Negative
 mov r0,#0FFh
@@ -466,7 +466,7 @@ ret
 
 
 ;====================================================================
-; subroutine ADD16
+; subroutine CADD16
 ; 16-Bit Signed (2's Complement) Addition
 ;
 ; input: r1, r0 = X
@@ -479,7 +479,7 @@ ret
 ;====================================================================
 
 ;org 8670
-ADD16:
+CADD16:
 ; orl PSW, #0x18 ; Register Bank 3
 mov a, r0 ; load X low byte into acc
 add a, r2 ; add Y low byte
