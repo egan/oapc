@@ -681,7 +681,7 @@ ret
 
 ;====================================================================
 ; subroutine Mr0r3
-; Sign bit multiplication.
+; Sign Bit Multiplication.
 ;
 ; inputs: MSIGN1 = sign(X): 1 if negative
 ;         MSIGN0 = sign(Y)
@@ -705,241 +705,206 @@ setb MSIGNALL		; Set sign bit if X xor Y are negative.
 ret
 
 ;====================================================================
-;16-Bit 2's Complement -> 32-Bit 2's Complement Conversion
-;SC16TOSC32
-;Input:
+; subroutine C16to32
+; 16-Bit 2's Complement Cast to 32-Bit 2's Complement
 ;
-; r1, r0=X: 16-Bit signed data (2's Complement)
-; r1 is X HIGH byte, r0 is X LOW byte
+; inputs: r1, r0 = X: 16-bit signed (2's complement)
 ;
-;Output:
-; r3, r2, r1, r0=X: 32-Bit signed data (2's Complement)
+; output: r3, r2, r1, r0 = X: 32-bit signed (2's complement)
 ;
-;Alters: ACC, C
+; alters: acc, C
 ;====================================================================
+; org XXXX
 C16toC32:
-mov r3,#00h
-mov r2,#00h
-mov a,r1
+mov r3, #0x00		; Pad high bytes with zeros.
+mov r2, #0x00
+mov a, r1			; Check sign of input.
 jnb acc.7, CC32End
-mov r3,#0FFh
-mov r2,#0FFh
-CC32End:
+mov r3, #0xFF		; Pad high bytes with ones because negative.
+mov r2, #0xFF
+
+CC32End:			; Done because positive.
 ret
 
 ;====================================================================
 ; subroutine CADD32
 ; 32-Bit Signed (2's Complement) Addition
 ;
-; input:
-; r3, r2, r1, r0=X: 32-Bit signed data (2's Complement),
-; r7, r6, r5, r4=Y: 32-Bit signed data (2's Complement)
+; inputs: r3, r2, r1, r0 = X
+;         r7, r7, r5, r4 = Y
 ;
-; output:
-; r3, r2, r1, r0=S: Signed sum (2's Complement), S=X+Y
-; Carry C is set if the result (S) is out of range
+; output: r3, r2, r1, r0 = signed sum S = X + Y
+;         C is set if overflow occurs
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
 ;org 8670
 CADD32:
-orl PSW, #0x18 ; Register Bank 3
-clr C ; clear carry flag
-mov a, r0 ; load X low byte into acc
-addc a, r4 ; add Y low byte
-mov r0, a ; put result in Z low byte
-
-mov a, r1 ; load X low byte into acc
-addc a, r5 ; add Y low byte
-mov r1, a ; put result in Z low byte
-
-mov a, r2 ; load X low byte into acc
-addc a, r6 ; add Y low byte
-mov r2, a ; put result in Z low byte
-
-mov a, r3 ; load X low byte into acc
-addc a, r7 ; add Y low byte
-mov r3, a ; put result in Z low byte
-
-mov C, OV
-
+orl psw, #0x18
+mov a, r0	; Add low bytes together.
+add a, r4
+mov r0, a	; Save result in S low byte.
+mov a, r1	; Add 2nd bytes together with carry.
+addc a, r5
+mov r1, a	; Save result in S 2nd byte.
+mov a, r2	; Add 3rd bytes together with carry.
+addc a, r6
+mov r2, a	; Save result in S 3rd byte.
+mov a, r3	; Add high bytes together with carry.
+addc a, r7
+mov r3, a	; Save result in S high byte.
+mov C, OV	; Set carry if overflow occurred.
 ret
-;====================================================================
+
 ;====================================================================
 ; subroutine CSUB32
-; 32-Bit Signed (2's Complement) Subtract
+; 32-Bit Signed (2's Complement) Subtraction
 ;
-; input:
-; r7, r6, r5, r4=X: 32-Bit signed data (2's Complement),
-; r3, r2, r1, r0=Y: 32-Bit signed data (2's Complement)
+; inputs: r7, r6, r5, r4 = X
+;         r3, r2, r1, r0 = Y
 ;
-; output:
-; r3, r2, r1, r0=S: Signed sum (2's Complement), S=X-Y
-; Carry C is set if the result (S) is out of range
+; output: r3, r2, r1, r0 = signed difference D = X - Y
+;         C is set if overflow occurs
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
 ;org 8670
 CSUB32:
-
-orl PSW, #0x18 ; Register Bank 3
-clr C ; clear carry flag
-mov a, r4 ; load X low byte into acc
-subb a, r0 ; add Y low byte
-mov r0, a ; put result in Z low byte
-
-mov a, r5 ; load X low byte into acc
-subb a, r1 ; add Y low byte
-mov r1, a ; put result in Z low byte
-
-mov a, r6 ; load X low byte into acc
-subb a, r2 ; add Y low byte
-mov r2, a ; put result in Z low byte
-
-mov a, r7 ; load X low byte into acc
-subb a, r3 ; add Y low byte
-mov r3, a ; put result in Z low byte
-
-mov C, OV
-
+orl PSW, #0x18
+clr C
+mov a, r4	; Subtract low bytes.
+subb a, r0
+mov r0, a	; Save result in D low byte.
+mov a, r5	; Subtract 2nd bytes with borrow.
+subb a, r1
+mov r1, a	; Save result in D 2nd byte.
+mov a, r6	; Subtract 3rd bytes with borrow.
+subb a, r2
+mov r2, a	; Save result in D 3rd byte.
+mov a, r7	; Subtract high bytes.
+subb a, r3
+mov r3, a	; Save result in D high byte.
+mov C, OV	; Set carry if overflow occurred.
 ret
+
 ;====================================================================
-;16-Bit 2's Complement -> 24-Bit 2's Complement Conversion
-;SC16TOC24
-;Input:
+; subroutine C16to32
+; 16-Bit 2's Complement Cast to 24-Bit 2's Complement
 ;
-; r1, r0=X: 16-Bit signed data (2's Complement)
-; r1 is X HIGH byte, r0 is X LOW byte
+; inputs: r1, r0 = X: 16-bit signed (2's complement)
 ;
-;Output:
-; r2, r1, r0=X: 24-Bit signed data (2's Complement)
+; output: r2, r1, r0 = X: 24-bit signed (2's complement)
 ;
-;Alters: ACC, C
+; alters: acc, C
 ;====================================================================
+;org XXXX
 C16toC24:
-mov r2,#00h
-mov a,r1
-jnb acc.7, CC24End
-mov r2,#0FFh
-CC24End:
+orl psw, #0x18
+mov r2, #0x00		; Pad high byte with zeros.
+mov a, r1
+jnb acc.7, CC24End	; Check sign of input.
+mov r2,#0xFF		; Pad high byte with ones because negative.
+
+CC24End:			; Done because positive.
 ret
 
 ;====================================================================
 ; subroutine CADD24
 ; 24-Bit Signed (2's Complement) Addition
 ;
-; input:
-; r2, r1, r0=X: 32-Bit signed data (2's Complement),
-; r6, r5, r4=Y: 32-Bit signed data (2's Complement)
+; inputs: r2, r1, r0 = X
+;         r6, r5, r4 = Y
 ;
-; output:
-; r2, r1, r0=S: Signed sum (2's Complement), S=X+Y
-; Carry C is set if the result (S) is out of range
+; output: r2, r1, r0 = signed sum S = X + Y
+;         C is set if overflow occurs
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
 ;org 8670
 CADD24:
-orl PSW, #0x18 ; Register Bank 3
-clr C ; clear carry flag
-mov a, r0 ; load X low byte into acc
-addc a, r4 ; add Y low byte
-mov r0, a ; put result in Z low byte
-
-mov a, r1 ; load X low byte into acc
-addc a, r5 ; add Y low byte
-mov r1, a ; put result in Z low byte
-
-mov a, r2 ; load X low byte into acc
-addc a, r6 ; add Y low byte
-mov r2, a ; put result in Z low byte
-
-mov C, OV
-
+orl psw, #0x18
+clr C
+mov a, r0	; Add low bytes together.
+add a, r4
+mov r0, a	; Save result in S low byte.
+mov a, r1	; Add middle bytes together with carry.
+addc a, r5
+mov r1, a	; Save result in S middle byte.
+mov a, r2	; Add high bytes together.
+addc a, r6
+mov r2, a	; Save result in S high byte.
+mov C, OV	; Set carry if overflow occurred.
 ret
 
 ;====================================================================
 ; subroutine CSUB24
-; 24-Bit Signed (2's Complement) Subtract
+; 24-Bit Signed (2's Complement) Subtraction
 ;
-; input:
-; r6, r5, r4=X: 24-Bit signed data (2's Complement),
-; r2, r1, r0=Y: 24-Bit signed data (2's Complement)
+; inputs: r6, r5, r4 = X
+;         r2, r1, r0 = Y
 ;
-; output:
-; r2, r1, r0=S: Signed sum (2's Complement), S=X-Y
-; Carry C is set if the result (S) is out of range
+; output: r2, r1, r0 = signed difference D = X - Y
+;         C is set if overflow occurs
 ;
-; alters: acc, C, OV
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
+;org XXXX
 CSUB24:
-
-orl PSW, #0x18 ; Register Bank 3
-clr C ; clear carry flag
-mov a, r4 ; load X low byte into acc
-subb a, r0 ; add Y low byte
-mov r0, a ; put result in Z low byte
-
-mov a, r5 ; load X low byte into acc
-subb a, r1 ; add Y low byte
-mov r1, a ; put result in Z low byte
-
-mov a, r6 ; load X low byte into acc
-subb a, r2 ; add Y low byte
-mov r2, a ; put result in Z low byte
-
-mov C, OV
-
+orl PSW, #0x18
+clr C
+mov a, r4	; Subtract low bytes.
+subb a, r0
+mov r0, a	; Save result in D low byte.
+mov a, r5	; Subtract middle bytes with borrow.
+subb a, r1
+mov r1, a	; Save result in D middle byte.
+mov a, r6	; Subtract high bytes with borrow.
+subb a, r2
+mov r2, a	; Save result in D high byte.
+mov C, OV	; Set carry if overflow occurred.
 ret
 
 ;====================================================================
-; subroutine ROUND
-; fixed float Signed (2's Complement) Round
+; subroutine FRound
+; 32-bit Signed (2's Complement) Fixed Point Q24.8 Round
 ;
-; input:
-; r3,r2,r1,r0=X: fixed float signed data (2's Complement),
-; r3r2r1.r0: (if r0>0.5)
+; XXX: As implemented now, it is Q16.8; no carry to r3 is performed.
 ;
-; output:
-; r3r2r1=S : integer
-; Carry C is set if the result (S) is out of range
+; inputs: r3, r2, r1. r0 = X
 ;
-; alters: acc, C, OV
+; output: r3, r2, r1 = round(X)
+;         C is set if overflow occurs
+;
+; alters: acc, C, OV, register bank 3
 ;====================================================================
-
 ;org 8670
 FRound:
-orl PSW, #0x18 ; Register Bank 3
-clr C ; clear carry flag
-mov a,r3
-
+orl PSW, #0x18
+clr C
+mov a, r3				; Check if positive.
 jnb acc.7, FRPositive
-
-mov a,r0 ; r0 > 0.5 (80h)
+mov a, r0				; Check if changing integer part is necessary.
 jb acc.7, FREND
-mov a, r1
-subb a, #01h
-mov r1,a
-mov a,r2
-subb a,#00h
-mov r2,a
-sjmp FREND
+mov a, r1				; Round to next integer (negative).
+subb a, #1
+mov r1, a				; Store result low byte.
+mov a, r2				; Carry borrow to high byte.
+subb a, #0
+mov r2, a				; Store result high byte.
+sjmp FREND				; Done.
+
 FRPositive:
-mov a,r0 ; r0 > 0.5 (80h)
+mov a, r0				; Check if changing integer part is necessary.
 jnb acc.7, FREND
-mov a, r1
-addc a, #01h
-mov r1,a
-mov a,r2
-addc a,#00h
-mov r2,a
+mov a, r1				; Round to next integer (positive).
+addc a, #1
+mov r1, a				; Store result low byte.
+mov a, r2				; Carry to high byte.
+addc a, #0
+mov r2, a				; Store result high byte.
 
 FREND:
-clr c
+clr C
 ret
 
 ; vim: filetype=tasm: tabstop=4:
