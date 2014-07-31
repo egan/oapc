@@ -660,7 +660,7 @@ mov r3, a		; Save result high byte.
 ret
 
 ;====================================================================
-; subroutine C2Com
+; subroutine C2Comp
 ; 16-Bit 2's Complement Operation
 ;
 ; inputs: r1, r0 = X
@@ -709,7 +709,7 @@ setb MSIGNALL		; Set sign bit if X xor Y are negative.
 ret
 
 ;====================================================================
-; subroutine C16to32
+; subroutine C16toC32
 ; 16-Bit 2's Complement Cast to 32-Bit 2's Complement
 ;
 ; inputs: r1, r0 = X: 16-bit signed (2's complement)
@@ -792,7 +792,7 @@ mov C, OV	; Set carry if overflow occurred.
 ret
 
 ;====================================================================
-; subroutine C16to32
+; subroutine C16toC24
 ; 16-Bit 2's Complement Cast to 24-Bit 2's Complement
 ;
 ; inputs: r1, r0 = X: 16-bit signed (2's complement)
