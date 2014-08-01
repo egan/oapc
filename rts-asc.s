@@ -66,12 +66,12 @@ INTCNT epz 65h
 DABSH epz 66H
 DABSL epz 67H
 
-; Digital-Analog conversion addresses.
+; Digital-Analog conversion and control addresses.
 _DA1_LOW equ 0FE18H
 _DA1_HIGH equ 0FE19H
 _DA_CNVT equ 0FE1FH
 
-; Up/Down counter addresses.
+; Up/Down counter countrol addresses.
 _UDCNT1_LOW equ 0FF05H
 _UDCNT1_HIGH equ 0FF06H
 
@@ -180,15 +180,14 @@ mov DABSH, #0x00	; Start temporary distance variables at 0.
 mov DABSL, #0x00
 ret
 
-;***********************************************************************
-; Clear position counter
-;Input:
-;
-;***********************************************************************
+;====================================================================
+; subroutine ClearCounter
+; Clear U/D Counter1
+;====================================================================
 ClearCounter:
-mov dptr, #_UDCNT1_HIGH ; Counter1
-mov a,#00h
-movx @dptr,a
+mov dptr, #_UDCNT1_HIGH	; Send reset command to UDC.
+mov a, #0x00
+movx @dptr, a
 ret
 
 ;***********************************************************************
