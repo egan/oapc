@@ -1,8 +1,9 @@
-
-
-;variable defined in internal data ram starting from 4E Unit
-;Stack bottom must be set to 70H in main program to prevent
-;a confilict between assembly variables and stack space
+;====================================================================;
+;--------------------------------------------------------------------;
+; INTERNAL DATA SETUP: Stack bottom must be set to 0x70 in main      ;
+;                      program to prevent conflicts.                 ;
+;--------------------------------------------------------------------;
+;====================================================================;
 
 ;50H, 51H current Up/Down counter Value-----------------> Xc(i) pulse
 XCHI epz 50H
