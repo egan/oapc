@@ -10,8 +10,8 @@ XGO	def 21H.0		; Motion start/stop flag.
 INPOS def 21H.1		; Servo lock flag.
 DATSAV def 21H.3
 MCDIR def 21H.4		; Motion direction flag.
-MSIGN0 def	21H.5	; Multiplicand sign flag.
-MSIGN1 def	21H.6	; Multiplier sign flag.
+MSIGN0 def 21H.5	; Multiplicand sign flag.
+MSIGN1 def 21H.6	; Multiplier sign flag.
 MSIGNALL def 21H.7	; Product sign flag.
 
 ; XXX: Buffer address value (16-bit).
@@ -75,44 +75,47 @@ _DA_CNVT equ 0FE1FH
 _UDCNT1_LOW equ 0FF05H
 _UDCNT1_HIGH equ 0FF06H
 
-;***********************************************************************
-; Timer interrupt Initial
-;
-;***********************************************************************
+;====================================================================;
+;--------------------------------------------------------------------;
+;         INITIALIZATION: Setup on initial timer interrupt.          ;
+;--------------------------------------------------------------------;
+;====================================================================;
 org 0x9F00
-push psw
-orl psw, #0x18	; use register bank 3 from now on
-push acc
+push psw			; Save main PSW to stack.
+orl psw, #0x18		; Use register bank 3 from now on.
+push acc			; Save main arithmetic registers to stack.
 push b
-push dpl
+push dpl			; Save main data pointer registers to stack.
 push dph
-
-mov dptr, #0xFA1B	; set Timer1 interrupt vector
-mov a, #0x02	;ljump timer interrupt subroutine address
+mov dptr, #0xFA1B	; Set Timer1 interrupt vector address (0xFA1B).
+mov a, #0x02		; Setup interrupt vector: LJMP 0x9F50.
 movx @dptr, a
 inc dptr
-mov a, #0x9F	;LJMP #0x
+mov a, #0x9F
 movx @dptr, a
 inc dptr
 mov a, #0x50
 movx @dptr, a
-mov tmod, #0x10	;16bit Timer/Counter
-mov tl1, #0E5h	;20Mhz,3ms (EC78h),10ms(BEE5h),
-mov th1, #0BEh	;20Mhz,1ms F97DH
-lcall ClearCounter
-mov a, #000h
-mov b,#080h
-lcall DAOUT
-lcall INITVAR;
-setb tr1
-orl ie,#0x88
 
-pop dph
+; At 20MHz, 1ms => 0xF97D, 3ms => 0xEC78, 10ms => 0xBEE5
+mov tmod, #0x10		; Setup Timer1 as 16-bit timer.
+mov tl1, #0xE5		; Setup Timer1 overflow period (10ms).
+mov th1, #0xBE
+
+lcall ClearCounter	; Clear the U/D counter.
+mov a, #0x00		; Start DAC with value 0x8000.
+mov b, #0x80
+lcall DAOUT
+lcall INITVAR		; Setup initial values of variables.
+setb TR1			; Start Timer1.
+orl ie, #0x88		; Enable interrupts from Timer1 overflow.
+
+pop dph				; Restore stacked registers.
 pop dpl
 pop b
 pop acc
 pop psw
-ret
+ret					; Done.
 
 
 ;***********************************************************************
