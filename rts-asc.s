@@ -156,30 +156,31 @@ pop psw
 reti
 
 
-;***********************************************************************
-; Initial variables
-;
-;
-;***********************************************************************
+;====================================================================
+; subroutine INITVAR
+; Set Up Initial Values of Variables
+;====================================================================
+; org XXX
 INITVAR:
-mov ABSX4,#00h
-mov ABSX3,#00h
-mov ABSX2,#00h
-mov ABSX1,#00h
-mov PEXH,#00h
-mov PEXL,#00h
-mov DXH,#00h
-mov DXL,#00h
-mov XCH,#00h ;---> FIRST PROBLEMATIC LINE NO ">"
-mov XCL,#00h ;--> crashes MPS
-setb INPOS
+mov ABSX4, #0x00	; Start absolute position ABSX at 0.
+mov ABSX3, #0x00
+mov ABSX2, #0x00
+mov ABSX1, #0x00
+mov PEXH, #0x00		; Start position error PEX at 0.
+mov PEXL, #0x00
+mov DXH, #0x00		; Start distance motion commant at 0.
+mov DXL, #0x00
+mov XCH, #0x00		; Start UDC value at 0.
+mov XCL, #0x00
+setb INPOS			; Lock servo in position.
 clr DATSAV
-clr XGO
-mov INTCNT ,#00h
-mov RDABSEN,#00h
-mov DABSH ,#00h
-mov DABSL ,#00h
+clr XGO				; Stop motion control.
+mov INTCNT, #0x00
+mov RDABSEN, #0x00
+mov DABSH, #0x00	; Start temporary distance variables at 0.
+mov DABSL, #0x00
 ret
+
 ;***********************************************************************
 ; Clear position counter
 ;Input:
