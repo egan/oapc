@@ -160,7 +160,6 @@ reti
 ; subroutine INITVAR
 ; Set Up Initial Values of Variables
 ;====================================================================
-; org XXX
 INITVAR:
 mov ABSX4, #0x00	; Start absolute position ABSX at 0.
 mov ABSX3, #0x00
@@ -489,7 +488,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8670
 CADD16:
 orl psw, #0x18
 mov a, r0	; Add low bytes together.
@@ -512,7 +510,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8690
 CSUB16:
 orl psw, #0x18
 clr C
@@ -540,7 +537,6 @@ ret
 ;
 ; alters: acc, C, OV, MSIGN0, MSIGN1, MSIGNALL, register bank 3
 ;====================================================================
-;org 86e0
 MUL16:
 orl psw, #0x18
 clr MSIGNALL	; Reset product sign flag.
@@ -562,7 +558,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 86d0
 UMUL16:
 orl psw, #0x18
 push b		; Save extra registers we will use to stack.
@@ -617,7 +612,6 @@ ret
 ;
 ; alters: acc, C, MSIGN1, register bank 3
 ;===================================================================
-;org 8710
 Cr0r1:
 orl psw, #0x18
 mov a, r1
@@ -648,7 +642,6 @@ ret
 ;
 ; alters: acc, C, MSIGN0, register bank 3
 ;====================================================================
-;org 8736
 Cr2r3:
 orl psw, #0x18
 mov a, r3
@@ -679,7 +672,6 @@ ret
 ;
 ; alters: acc, C, register bank 3
 ;====================================================================
-; org XXXX
 C2Comp:
 orl psw, #0x18
 mov a, r0	; 1's complement low byte.
@@ -703,7 +695,6 @@ ret
 ;
 ; alters: acc, C, MSIGNALL
 ;====================================================================
-;org 8760
 Mr0r3:
 jb MSIGN1, Mr0r3b	; Test if X or Y are negative.
 jb MSIGN0, Mr0r3a
@@ -727,7 +718,6 @@ ret
 ;
 ; alters: acc, C
 ;====================================================================
-; org XXXX
 C16toC32:
 mov r3, #0x00		; Pad high bytes with zeros.
 mov r2, #0x00
@@ -751,7 +741,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8670
 CADD32:
 orl psw, #0x18
 mov a, r0	; Add low bytes together.
@@ -781,7 +770,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8670
 CSUB32:
 orl psw, #0x18
 clr C
@@ -810,7 +798,6 @@ ret
 ;
 ; alters: acc, C
 ;====================================================================
-;org XXXX
 C16toC24:
 orl psw, #0x18
 mov r2, #0x00		; Pad high byte with zeros.
@@ -833,7 +820,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8670
 CADD24:
 orl psw, #0x18
 clr C
@@ -861,7 +847,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org XXXX
 CSUB24:
 orl psw, #0x18
 clr C
@@ -890,7 +875,6 @@ ret
 ;
 ; alters: acc, C, OV, register bank 3
 ;====================================================================
-;org 8670
 FRound:
 orl psw, #0x18
 clr C
