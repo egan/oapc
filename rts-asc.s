@@ -27,7 +27,7 @@ DXCH epz 4EH
 DXCL epz 4FH
 
 ; Up/Down counter value XC (16-bit).
-XCHI epz 50H
+XCH epz 50H
 XCL epz 51H
 
 ; Position interpolation increment DFX (16-bit).
@@ -167,7 +167,7 @@ mov PEXH,#00h
 mov PEXL,#00h
 mov DXH,#00h
 mov DXL,#00h
-mov XCHI,#00h ;---> FIRST PROBLEMATIC LINE NO ">"
+mov XCH,#00h ;---> FIRST PROBLEMATIC LINE NO ">"
 mov XCL,#00h ;--> crashes MPS
 setb INPOS
 clr DATSAV
@@ -211,12 +211,12 @@ ret
 ;***********************************************************************
 ;1. Read Up/Down counter
 ;
-;Output: XCHI --- HIGH byte of couter value
+;Output: XCH --- HIGH byte of couter value
 ; XCL --- LOW byte
 ;
 ;***********************************************************************
 ReadUDCounter:
-mov r3,XCHI ;count value atlast period
+mov r3,XCH ;count value atlast period
 mov r2,XCL
 mov dptr,#_UDCNT1_LOW ;enable start read
 mov a,#00h
@@ -226,14 +226,14 @@ movx a, @dptr
 mov XCL,a ;Read LOW byte
 mov dptr,#_UDCNT1_HIGH
 movx a, @dptr
-mov XCHI,a ;Read HIGH byte
+mov XCH,a ;Read HIGH byte
 ret
 
 ;***********************************************************************
 ;2. Motion increment/ decrement calculation and update absolute counter
 ;
 ;Input:
-; XCHI: Last counter value HIGH byte
+; XCH: Last counter value HIGH byte
 ; XCL: Last counter value LOW byte
 ; ABSX4: Last absolute value 4TH byte
 ; ABSX3: Last absolute value 3RD byte
@@ -249,7 +249,7 @@ ret
 ;
 ;***********************************************************************
 PosDiffCAL:
-mov r1,XCHI
+mov r1,XCH
 mov r0,XCL
 lcall CSUB16
 mov DXCH,r1
