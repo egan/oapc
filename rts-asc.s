@@ -5,71 +5,74 @@
 ;--------------------------------------------------------------------;
 ;====================================================================;
 
-;50H, 51H current Up/Down counter Value-----------------> Xc(i) pulse
+; System flags.
+XGO	def 21H.0		; Motion start/stop flag.
+INPOS def 21H.1		; Servo lock flag.
+DATSAV def 21H.3
+MCDIR def 21H.4		; Motion direction flag.
+MSIGN0 def	21H.5	; Multiplicand sign flag.
+MSIGN1 def	21H.6	; Multiplier sign flag.
+MSIGNALL def 21H.7	; Product sign flag.
+
+; XXX: Buffer address value (16-bit).
+BUFF_ADRL def 4AH
+BUFF_ADRH def 4BH
+
+; Velocity command value (16-bit).
+VELXH epz 4CH
+VELXL epz 4DH
+
+; Position increment/decrement.
+DXCH epz 4EH
+DXCL epz 4FH
+
+; Up/Down counter value (16-bit).
 XCHI epz 50H
 XCL epz 51H
 
-;52H, 53H interpolation position increment --------------> DFX Pulse
+; Position interpolation increment (16-bit).
 DFXH epz 53H
 DFXL epz 52H
 
-;54H, 55H position following error --------> PEX(i) Pulse
+; Position following error (16-bit).
 PEXH epz 54H
 PEXL epz 55H
 
-;56H, 57H ,58H,59H Residual distance ---------------> Fx(i) Pulse
-FX4 epz 59H
-FX3 epz 58H
-FX2 epz 57H
+; Residual distance to end position (32-bit).
 FX1 epz 56H
+FX2 epz 57H
+FX3 epz 58H
+FX4 epz 59H
 
-;5AH Proportioanl gain ---------------> Kp
-KP epz 5AH
+; Proportional gains.
+KP epz 5AH		; During motion.
+KPINP epz 5BH	; Servo locked (in position).
 
-;5BH Servo locked Proportioanl gain ---------------> Kpinp
-KPINP epz 5BH
-
-; 5EH, 5FH Distance motion command per sampling period --------------> DX Pulse
+; Distance motion command per sampling period (16-bit).
 DXH epz 5EH
 DXL epz 5FH
 
-;60H,61H,62H,63H current absolute position counter-----------------------ABX Pusle
-ABSX4 epz 63H
-ABSX3 epz 62H
-ABSX2 epz 61H
+; Absolute position counter value (32-bit).
 ABSX1 epz 60H
+ABSX2 epz 61H
+ABSX3 epz 62H
+ABSX4 epz 63H
 
 RDABSEN epz 64H
 INTCNT epz 65h
 
-;66H,67H Temporary variables
-DABSH epz 66h
-DABSL epz 67h
+; Temporary variable (16-bit) for position inc/decrement calculation.
+DABSH epz 66H
+DABSL epz 67H
 
-;4CH,4DH Velocity Command Value-------------------------VELX
-VELXH epz 4CH
-VELXL epz 4DH
+; Digital-Analog conversion addresses.
+_DA1_LOW equ 0FE18H
+_DA1_HIGH equ 0FE19H
+_DA_CNVT equ 0FE1FH
 
-; 4EH, 4FH Position increment/decrement -------------- delta Xc(i) Pulse
-DXCH epz 4EH
-DXCL epz 4FH
-
-XGO def	021H.0 ; motion start/stop flag
-INPOS def	021H.1 ; used for servo lock flag
-MCDIR def	021H.4 ; direction command from PC
-DATSAV def	021H.3
-
-MSIGN0 def	021H.5
-MSIGN1 def	021H.6
-MSIGNALL def	021H.7
-BUFF_ADRL def 04AH
-BUFF_ADRH def 04BH
-_DA1_LOW equ 0FE18h
-_DA1_HIGH equ 0FE19h
-_DA_CNVT equ 0FE1Fh
-
-_UDCNT1_LOW equ 0FF05h
-_UDCNT1_HIGH equ 0FF06h
+; Up/Down counter addresses.
+_UDCNT1_LOW equ 0FF05H
+_UDCNT1_HIGH equ 0FF06H
 
 ;***********************************************************************
 ; Timer interrupt Initial
