@@ -18,27 +18,27 @@ MSIGNALL def 21H.7	; Product sign flag.
 BUFF_ADRL def 4AH
 BUFF_ADRH def 4BH
 
-; Velocity command value (16-bit).
+; Velocity command value VELX (16-bit).
 VELXH epz 4CH
 VELXL epz 4DH
 
-; Position increment/decrement.
+; Position increment/decrement DXC (16-bit).
 DXCH epz 4EH
 DXCL epz 4FH
 
-; Up/Down counter value (16-bit).
+; Up/Down counter value XC (16-bit).
 XCHI epz 50H
 XCL epz 51H
 
-; Position interpolation increment (16-bit).
+; Position interpolation increment DFX (16-bit).
 DFXH epz 53H
 DFXL epz 52H
 
-; Position following error (16-bit).
+; Position following error PEX (16-bit).
 PEXH epz 54H
 PEXL epz 55H
 
-; Residual distance to end position (32-bit).
+; Residual distance to end position FX (32-bit).
 FX1 epz 56H
 FX2 epz 57H
 FX3 epz 58H
@@ -48,16 +48,17 @@ FX4 epz 59H
 KP epz 5AH		; During motion.
 KPINP epz 5BH	; Servo locked (in position).
 
-; Distance motion command per sampling period (16-bit).
+; Distance motion command per sampling period DX (16-bit).
 DXH epz 5EH
 DXL epz 5FH
 
-; Absolute position counter value (32-bit).
+; Absolute position counter value ABSX (32-bit).
 ABSX1 epz 60H
 ABSX2 epz 61H
 ABSX3 epz 62H
 ABSX4 epz 63H
 
+; XXX: Unknown use.
 RDABSEN epz 64H
 INTCNT epz 65h
 
