@@ -157,7 +157,6 @@ pop b
 pop psw			; XXX: Was PSW ever pushed to stack?
 reti
 
-
 ;====================================================================
 ; subroutine INITVAR
 ; Set Up Initial Values of Variables
@@ -212,25 +211,24 @@ mov dptr, #_DA_CNVT		; Start D/A conversion.
 movx @dptr, a
 ret
 
-;***********************************************************************
-;1. Read Up/Down counter
+;====================================================================
+; subroutine ReadUDCounter
+; 1. Read Up/Down counter.
 ;
-;Output: XCH --- HIGH byte of couter value
-; XCL --- LOW byte
-;
-;***********************************************************************
+; output: XCH, XCL = UDC counter value (16-bit)
+;====================================================================
 ReadUDCounter:
-mov r3,XCH ;count value atlast period
-mov r2,XCL
-mov dptr,#_UDCNT1_LOW ;enable start read
-mov a,#00h
-movx @dptr,a
-mov dptr,#_UDCNT1_LOW
+mov r3, XCH				; Store value at last period.
+mov r2, XCL
+mov dptr, #_UDCNT1_LOW	; Send start read enable command to UDC.
+mov a, #0x00
+movx @dptr, a
+mov dptr, #_UDCNT1_LOW	; Read low byte XCL.
 movx a, @dptr
-mov XCL,a ;Read LOW byte
-mov dptr,#_UDCNT1_HIGH
+mov XCL, a
+mov dptr, #_UDCNT1_HIGH	; Read high byte XCH.
 movx a, @dptr
-mov XCH,a ;Read HIGH byte
+mov XCH, a
 ret
 
 ;***********************************************************************
