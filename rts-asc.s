@@ -63,7 +63,7 @@ ABSX3 epz 62H
 ABSX4 epz 63H
 
 ; XXX: Unknown use.
-RDABSEN epz 64H
+RDABSEN epz 64H	; Enable updating software absolute position counter.
 INTCNT epz 65h
 
 ; Temporary variable (16-bit) for position inc/decrement calculation.
@@ -243,60 +243,50 @@ movx a, @dptr
 mov XCH, a
 ret
 
-;***********************************************************************
-;2. Motion increment/ decrement calculation and update absolute counter
+;====================================================================
+; subroutine PosDiffCAL
+; 2. Motion inc/decrement calculation and absolute counter update.
 ;
-;Input:
-; XCH: Last counter value HIGH byte
-; XCL: Last counter value LOW byte
-; ABSX4: Last absolute value 4TH byte
-; ABSX3: Last absolute value 3RD byte
-; ABSX2: Last absolute value 2ND byte
-; ABSX1: Last absolute value 1ST byte
-;Output:
-; DXCH: Count difference at adjacent sampling time HIGH byte
-; DXCL: Count difference at adjacent sampling time LOW byte
-; ABSX4: Current absolute value 4TH byte
-; ABSX3: Current absolute value 3RD byte
-; ABSX2: Current absolute value 2ND byte
-; ABSX1: Current absolute value 1ST byte
+; inputs: XCH, XCL = XC; ABSX4, ABSX3, ABSX2, ABSX1 = ABSX
 ;
-;***********************************************************************
+; output: DXCH, DXCL = DXC_i = XC_i - XC_{i-1}
+;         ABSX4, ABSX3, ABSX2, ABSX1 = ABSX_i = ABSX_{i-1} + DXC_i
+;
+; alters: DABSH, DABSL, register bank 3
+;====================================================================
 PosDiffCAL:
-mov r1,XCH
-mov r0,XCL
+; Calculate position encoder inc/decrement.
+mov r1, XCH			; Subtract last XC (loaded into registers by
+mov r0, XCL			; ReadUDCounter) from current XC.
 lcall CSUB16
-mov DXCH,r1
+mov DXCH,r1			; Store result in DXC.
 mov DXCL,r0
-
-mov r3,DABSH
-mov r2,DABSL
+; Calculate absolute position inc/decrement.
+mov r3, DABSH		; Add DXC to DABS.
+mov r2, DABSL
 lcall CADD16
-mov DABSH,r1
-mov DABSL,r0
-mov a, RDABSEN
-xrl a,#01h	;Read absolute count value
-jnz ABXUpdate
-ret
+mov DABSH, r1		; And store result in DABS.
+mov DABSL, r0
+mov a, RDABSEN		; Is RDABSEN 0?
+xrl a, #0x01
+jnz ABXUpdate		; If RDABSEN == 0, continue.
+ret					; Else return.
+
 ABXUpdate:
-mov r1,DABSH
-mov r0,DABSL
-lcall C16toC24 ;r0,r1,r2,r3
-
-mov r7,ABSX4
-mov r6,ABSX3
-mov r5,ABSX2
-mov r4,ABSX1
-
-lcall CADD24 ;calculate the absolute position
-
-mov ABSX4,r3
-mov ABSX3,r2
-mov ABSX2,r1
-mov ABSX1,r0
-
-mov DABSH,#00h
-mov DABSL,#00h
+mov r1, DABSH		; Cast DABS to 24-bit format.
+mov r0, DABSL
+lcall C16toC24
+mov r7, ABSX4		; Add DABS to ABSX.
+mov r6, ABSX3
+mov r5, ABSX2
+mov r4, ABSX1
+lcall CADD24
+mov ABSX4, r3		; And store result in ABSX.
+mov ABSX3, r2
+mov ABSX2, r1
+mov ABSX1, r0
+mov DABSH, #0x00	; Reset DABS.
+mov DABSL, #0x00
 ret
 
 ;***********************************************************************
