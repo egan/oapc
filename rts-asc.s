@@ -105,7 +105,7 @@ mov th1, #0xBE
 lcall ClearCounter	; Clear the U/D counter.
 mov a, #0x00		; Start DAC with value 0x8000.
 mov b, #0x80
-lcall DAOUT
+lcall DAOut
 lcall INITVAR		; Setup initial values of variables.
 setb TR1			; Start Timer1.
 orl ie, #0x88		; Enable interrupts from Timer1 overflow.
@@ -118,41 +118,43 @@ pop psw
 ret					; Done.
 
 
-;***********************************************************************
-; Timer interrupt subroutine
-;
-;***********************************************************************
+;====================================================================;
+;--------------------------------------------------------------------;
+;          REALTIME SYSTEM: Main code for timer interrupt.           ;
+;--------------------------------------------------------------------;
+;====================================================================;
 org 0x9F50
-push B
+push b			; Save main arithmetic registers to stack.
 push acc
-orl psw, #0x18
-mov tl1, #0E5h	;20Mhz,3ms (EC78h),10ms(BEE5h),
-mov th1, #0BEh	;20Mhz,1ms F97DH
-push dpl
+orl psw, #0x18	; Use register bank 3 from now on.
+mov tl1, #0xE5	; Setup Timer 1 overflow period (10ms).
+mov th1, #0xBE
+push dpl		; Save data pointer registers to stack.
 push dph
 
 ;mov dptr, #0xFF00
 ;mov a, #0xFF
 ;movx @dptr, a
 
-lcall ReadUDCounter ;module 1
-lcall PosDiffCAL ;module 2
-lcall PEXUpdate ;module 3
-lcall INPOSJudge ;module 4
-lcall	PPCAL ;module 5
-lcall	DAOUTVEL ;module 6
-lcall INTPAndFXCheck ;module 7,8
+; Call each of the modules in turn.
+lcall ReadUDCounter		; Module 1.
+lcall PosDiffCAL		; Module 2.
+lcall PEXUpdate			; Module 3.
+lcall INPOSJudge		; Module 4.
+lcall PPCAL				; Module 5.
+lcall DAOUTVEL			; Module 6.
+lcall INTPAndFXCheck	; Modules 7 and 8.
 
 ;mov dptr, #0xFF00
 ;mov a, #0x00
 ;movx @dptr, a
 
 done:
-pop dph
+pop dph			; Restore staced registers.
 pop dpl
 pop acc
-pop B
-pop psw
+pop b
+pop psw			; XXX: Was PSW ever pushed to stack?
 reti
 
 
@@ -190,24 +192,24 @@ mov a, #0x00
 movx @dptr, a
 ret
 
-;***********************************************************************
-; D/A output
-;Input:
-; High byte (B), Low byte (ACC)
+;====================================================================
+; subroutine DAOut
+; Output to Digital-Analog Converter
 ;
-;***********************************************************************
+; inputs: b, acc = D
+;====================================================================
 DAOut:
-mov dptr, #_DA1_LOW
-movx @dptr,a
+mov dptr, #_DA1_LOW		; Push D low byte to DAC.
+movx @dptr, a
+nop						; Wait two computation cycles.
 nop
-nop
-mov a,b
+mov a, b				; Push D high byte to DAC
 mov dptr, #_DA1_HIGH
 movx @dptr,a
+nop						; Wait two computation cycles.
 nop
-nop
-mov dptr, #_DA_CNVT ;start conversion
-movx @dptr,a
+mov dptr, #_DA_CNVT		; Start D/A conversion.
+movx @dptr, a
 ret
 
 ;***********************************************************************
