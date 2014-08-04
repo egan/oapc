@@ -14,6 +14,10 @@ MSIGN0 def 21H.5	; Multiplicand sign flag.
 MSIGN1 def 21H.6	; Multiplier sign flag.
 MSIGNALL def 21H.7	; Product sign flag.
 
+; Timing counter value (16-bit).
+CNTL epz 23H
+CNTH epz 24H
+
 ; XXX: Buffer address value (16-bit).
 BUFF_ADRL def 4AH
 BUFF_ADRH def 4BH
@@ -136,6 +140,12 @@ push dph
 ;mov a, #0xFF
 ;movx @dptr, a
 
+mov dph, CNTH	; Increment timing counter.
+mov dpl, CNTL
+inc dptr
+mov CNTH, dph
+mov CNTL, dpl
+
 ; Call each of the modules in turn.
 lcall ReadUDCounter		; Module 1.
 lcall PosDiffCAL		; Module 2.
@@ -179,6 +189,8 @@ mov INTCNT, #0x00
 mov RDABSEN, #0x00
 mov DABSH, #0x00	; Start temporary distance variables at 0.
 mov DABSL, #0x00
+mov CNTH, #0x00		; Start the timer at 0.
+mov CNTL, #0x00		;
 ret
 
 ;====================================================================
