@@ -245,7 +245,7 @@ ret
 
 ;====================================================================
 ; subroutine PosDiffCAL
-; 2. Motion inc/decrement calculation and absolute counter update.
+; 2. Motion Inc/Decrement Calculation and Absolute Counter Update
 ;
 ; inputs: XCH, XCL = XC; ABSX4, ABSX3, ABSX2, ABSX1 = ABSX
 ;
@@ -373,33 +373,35 @@ mov VELXL, r0
 mov VELXH, r1
 ret
 
-;***********************************************************************
-;6. D-to-A Conversion for velocity command output
+;====================================================================
+; subroutine DAOUTVEL
+; 6. Offset Correction for DAC Output
 ;
-;Input:
-; VELXH: Velocity command value HIGH byte
-; VELXL: Velocity command value LOW byte
-;Output:
-; VELDA: Digital Velocity command value
+; inputs: VELXH, VELXL = VELX
 ;
-;***********************************************************************
+; output: digital velocity command value VELDA
+;
+; alters: acc, b, register bank 3
+;====================================================================
 DAOUTVEL:
-jb MSIGNALL, VELNEG
-mov r0,#0FFh	;VELX is Positive
-mov r1,#07Fh
+jb MSIGNALL, VELNEG	; Is commanded velocity negative?
+mov r0,#0xFF		; If positive, add 0x7FFF (offset of 0)
+mov r1,#0x7F
 mov r2,VELXL
 mov r3,VELXH
 lcall CADD16
-sjmp WROutput
-VELNEG:	;VELX is Negative
-mov r0,#0FFh
-mov r1,#07Fh
+sjmp WROutput		; Done.
+
+VELNEG:
+mov r0,#0xFF		; If negative, subtract 0x7FFF.
+mov r1,#0x7F
 mov r2,VELXL
 mov r3,VELXH
 lcall CSUB16
-WROutput: ; write to D/A converter
-mov a,r0
-mov b,r1
+
+WROutput:			; Write offset value to DAC.
+mov a, r0
+mov b, r1
 lcall DAOut
 ret
 
