@@ -216,7 +216,7 @@ nop						; Wait two computation cycles.
 nop
 mov a, b				; Push D high byte to DAC
 mov dptr, #_DA1_HIGH
-movx @dptr,a
+movx @dptr, a
 nop						; Wait two computation cycles.
 nop
 mov dptr, #_DA_CNVT		; Start D/A conversion.
@@ -228,6 +228,7 @@ ret
 ; 1. Read Up/Down counter.
 ;
 ; output: XCH, XCL = UDC counter value (16-bit)
+;         r3, r2 = XCH_{i-1}, XCL_{i-1}
 ;====================================================================
 ReadUDCounter:
 mov r3, XCH				; Store value at last period.
@@ -250,6 +251,7 @@ ret
 ; inputs: XCH, XCL = XC; ABSX4, ABSX3, ABSX2, ABSX1 = ABSX
 ;
 ; output: DXCH, DXCL = DXC_i = XC_i - XC_{i-1}
+;         If RDABSEN is not set:
 ;         ABSX4, ABSX3, ABSX2, ABSX1 = ABSX_i = ABSX_{i-1} + DXC_i
 ;
 ; alters: DABSH, DABSL, register bank 3
