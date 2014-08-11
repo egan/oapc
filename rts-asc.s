@@ -321,26 +321,26 @@ mov PEXH, r1		; Store result in PEX.
 mov PEXL, r0
 ret
 
-;***********************************************************************
-;4. In-position Discrimination
+;====================================================================
+; subroutine INPOSJudge
+; 4. Determine Required State of Motion Control
 ;
-;Input:
-; XGO: Motion start flag at current sampling time
-; INPOS: Servo locked flag at last sampling time
+; inputs: XGO; INPOS
 ;
-;Output:
-; INPOS: Servo locked flag at this sampling time
+; output: INPOS
 ;
-;***********************************************************************
+;====================================================================
 INPOSJudge:
-jnb XGO, MCStop
-clr INPOS
-ret
-MCStop:
-jnb INPOS, SetINPOS
-ret
-SetINPOS:
-setb INPOS
+jnb XGO, MCStop		; Is motion control active?
+clr INPOS			; Then unlock servo.
+ret					; And finish.
+
+MCStop:				; Otherwise:
+jnb INPOS, SetINPOS	; Is the servo locked?
+ret					; Then finish.
+
+SetINPOS:			; If servo not locked,
+setb INPOS			; Lock servo.
 ret
 
 ;***********************************************************************
