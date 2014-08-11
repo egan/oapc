@@ -6,7 +6,7 @@
 ;====================================================================;
 
 ; System flags.
-XGO	def 21H.0		; Motion start/stop flag.
+XGO def 21H.0		; Motion start/stop flag.
 INPOS def 21H.1		; Servo lock flag.
 DATSAV def 21H.3
 MCDIR def 21H.4		; Motion direction flag.
@@ -291,38 +291,34 @@ mov DABSH, #0x00	; Reset DABS.
 mov DABSL, #0x00
 ret
 
-;***********************************************************************
-;3. Position error update
+;====================================================================
+; subroutine PEXUpdate
+; 3. Update Position Error
 ;
-;Input:
-; DXCH: Position difference at adjacent sampling time HIGH byte
-; DXCL: Position difference at adjacent sampling time LOW byte
-; DXH: Distance motion command per sampling period HIGH byte
-; DXL: Distance motion command per sampling period LOW byte
-; PEXH: Position following error at last sampling time HIGH byte
-; PEXL: Position following error at last sampling time LOW byte
+; inputs: DXCH, DXCL = DXC; DXH, DXL = DX; PEXH, PEXL = PEX_{i-1}
 ;
-;Output:
-; PEXH: Position following error at this sampling time HIGH byte
-; PEXL: Position following error at this sampling time LOW byte
+; output: PEXH, PEXL = PEX_i = PEX_{i-1} - DXC +/- DX
 ;
-;***********************************************************************
+; alters: register bank 3
+;====================================================================
 PEXUpdate:
-mov r1,PEXH ;Last PEX
-mov r0,PEXL ;last PEX
-mov r3,DXCH
-mov r2,DXCL ;PEXi=PEX(i-1)-DXC+(-)DX
-lcall CSUB16 ;
-mov r3,DXH
-mov r2,DXL ;
-jnb MCDIR ,PlusDir ;
-lcall CSUB16 ;-dir
-sjmp OutPEX
-PlusDir:	;+dir
-lcall CADD16
+mov r1, PEXH		; Subtract current DXC from last PEX.
+mov r0, PEXL
+mov r3, DXCH
+mov r2, DXCL
+lcall CSUB16
+mov r3, DXH
+mov r2, DXL
+jnb MCDIR, PlusDir	; Is commanded direction positive?
+lcall CSUB16		; If MCDIR == 1, subtract DX from difference.
+sjmp OutPEX			; Finish.
+
+PlusDir:
+lcall CADD16		; If MCDIR == 0, add DX to difference.
+
 OutPEX:
-mov PEXH,r1
-mov PEXL,r0
+mov PEXH, r1		; Store result in PEX.
+mov PEXL, r0
 ret
 
 ;***********************************************************************
