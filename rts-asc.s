@@ -361,9 +361,9 @@ mov a, KPINP		; If INPOS = 1, use servo locked gain KPINP.
 CALPP:
 mov r2, a			; Pad gain to 16-bit precision.
 mov r3, #0x00
-mov r1, PEXH
+mov r1, PEXH		; And multiply with PEX.
 mov r0, PEXL
-lcall MUL16			; And multiply with PEX.
+lcall MUL16
 mov VELXL, r0		; Store result in VELX.
 mov VELXH, r1
 ret
@@ -400,73 +400,50 @@ mov b, r1
 lcall DAOut
 ret
 
-;***********************************************************************
-;7. Interpolation command for next interrupt and Final Position update
+;====================================================================
+; subroutine INTPAndFXCheck
+; 7. Interpolation Command and Update Final Position
 ;
-;Input:
-; DFXH: Distance to be moved per sampling period HIGH byte
-; DFXL: Distance to be moved per sampling period LOW byte
-; FX4: Distance to be moved FOURTH byte
-; FX3: Distance to be moved THIRD byte
-; FX2: Distance to be moved SECOND byte
-; FX1: Distance to be moved FIRST byte
-; INPOS: Servo locked flag
-;Output:
-; DXH: Distance motion command per sampling period HIGH byte
-; DXL: Distance motion command per sampling period HIGH byte
-; XGO: Motion start/stop flag;
-; FX4: Next distance to be moved FOURTH byte
-; FX3: Next distance to be moved THIRD byte
-; FX2: Next distance to be moved SECOND byte
-; FX1: Next distance to be moved FIRST byte
+; inputs: DFXH, DFXL = DFX; FX4, FX3, FX2, FX1 = FX_{i-1}; INPOS
 ;
+; output: DXH, DXL = DX
+;         FX4, FX3, FX2, FX1 = FX_i
+;         XGO
+;
+; alters: register bank 3
 ;***********************************************************************
 INTPAndFXCheck:
-jnb XGO, StopINTP
-mov r1,DFXH
-mov r0,DFXL
-lcall C16toC24 ;r0,r1,r2,r3
-mov r7,FX4
-mov r6,FX3
-mov r5,FX2
-mov r4,FX1
-lcall CSUB24 ;
-mov FX4,r3
-mov FX3,r2
-mov FX2,r1
-mov FX1,r0
+jnb XGO, StopINTP	; If motion control is inactive, skip.
+mov r1, DFXH		; Otherwise, convert DFX to 24-bit precision.
+mov r0, DFXL
+lcall C16toC24		; XXX: Why 24, not 32? Extra byte of FX!
+mov r7, FX4			; Subtract DFX from FX. (r6, r5, r4) - (r2, r1, r0)
+mov r6, FX3
+mov r5, FX2
+mov r4, FX1
+lcall CSUB24
+mov FX4, r3			; Store result in FX. (r0, r1, r2)
+mov FX3, r2			; XXX: Where does r3 come from?
+mov FX2, r1
+mov FX1, r0
 sjmp FXCheckXGO
 
-;***********************************************************************
-;8. Interpolation end Discrimination and update distance¨Cto-go at final period
-;
-;Input:
-; FX4: Distance to be moved FOURTH byte
-; FX3: Distance to be moved THIRD byte
-; FX2: Distance to be moved SECOND byte
-; FX1: Distance to be moved FIRST byte
-;Output:
-; DXH: Distance motion command per sampling period HIGH byte
-; DXL: Distance motion command per sampling period HIGH byte
-; XGO: Motion start/stop flag;
-;
-;***********************************************************************
-
 FXCheckXGO:
-mov a,FX3
-jb acc.7, CLRXGO ;FX is negative
-mov DXH, DFXH
+mov a, FX3			; Is FX negative?
+jb acc.7, CLRXGO	; If yes, we have past destination.
+mov DXH, DFXH		; If not, new DX is DFX.
 mov DXL, DFXL
-ret
+ret					; Finish.
 
 CLRXGO:
-mov DXH,r5
-mov DXL,r4
-CLR XGO
-ret
+mov DXH, r5			; If past, DX is low bytes of FX... XXX?
+mov DXL, r4
+CLR XGO				; Stop motion control.
+ret					; Finish.
+
 StopINTP:
-mov DXH,#000h
-mov DXL,#000h
+mov DXH, #0x00		; Motion control inactive => no motion command.
+mov DXL, #0x00
 ret
 
 ;====================================================================;
