@@ -62,7 +62,7 @@ ABSX2 epz 61H
 ABSX3 epz 62H
 ABSX4 epz 63H
 
-; XXX: Unknown use.
+; Miscellaneous Flags.
 RDABSEN epz 64H	; Enable updating software absolute position counter.
 INTCNT epz 65h
 
@@ -382,18 +382,18 @@ ret
 ;====================================================================
 DAOUTVEL:
 jb MSIGNALL, VELNEG	; Is commanded velocity negative?
-mov r0,#0xFF		; If positive, add 0x7FFF (offset of 0)
-mov r1,#0x7F
-mov r2,VELXL
-mov r3,VELXH
+mov r0, #0xFF		; If positive, add 0x7FFF (offset of 0)
+mov r1, #0x7F
+mov r2, VELXL
+mov r3, VELXH
 lcall CADD16
 sjmp WROutput		; Done.
 
 VELNEG:
-mov r0,#0xFF		; If negative, subtract 0x7FFF.
-mov r1,#0x7F
-mov r2,VELXL
-mov r3,VELXH
+mov r0, #0xFF		; If negative, subtract 0x7FFF.
+mov r1, #0x7F
+mov r2, VELXL
+mov r3, VELXH
 lcall CSUB16
 
 WROutput:			; Write offset value to DAC.
