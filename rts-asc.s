@@ -342,31 +342,29 @@ SetINPOS:			; If servo not locked,
 setb INPOS			; Lock servo.
 ret
 
-;***********************************************************************
-;5. Proportional control algorithm calculation
+;====================================================================
+; subroutine PPCAL
+; 5. Proportional Control Algorithm
 ;
-;Input:
-; PEXH: Position following error at this sampling time HIGH byte
-; PEXL: Position following error at this sampling time LOW byte
-; KP: Proportion control gain
-; KPINP: Servo locked gain
-; INPOS: Servo locked flag
-;Output:
-; VELXH: Velocity command value HIGH byte
-; VELXL: Velocity command value LOW byte
+; inputs: PEXH, PEXL = PEX; KP; KPINP; INPOS
+
+; output: VELXH, VELXL = VELX = KP * PEX if INPOS = 0
+;                             = KPINP * PEX if INPOS = 1
 ;
+; alters: acc, register bank 3
 ;***********************************************************************
 PPCAL:
-mov a, KP
-jnb INPOS, CALPP
-mov a, KPINP ; INPOS gain
+mov a, KP			; Default to in-motion gain KP.
+jnb INPOS, CALPP	; Is servo locked?
+mov a, KPINP		; If INPOS = 1, use servo locked gain KPINP.
+
 CALPP:
-mov r2, a
-mov r3, #00H ;
+mov r2, a			; Pad gain to 16-bit precision.
+mov r3, #0x00
 mov r1, PEXH
 mov r0, PEXL
-lcall mul16
-mov VELXL, r0
+lcall mul16			; And multiply with PEX.
+mov VELXL, r0		; Store result in VELX.
 mov VELXH, r1
 ret
 
