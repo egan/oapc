@@ -538,44 +538,44 @@ ret
 ;====================================================================
 UMUL16:
 orl psw, #0x18
-push b		; Save extra registers we will use to stack.
+push b			; Save extra registers we will use to stack.
 push dpl
-mov a, r0	; Multiply XL x YL.
+mov a, r0		; Multiply XL x YL.
 mov b, r2
 mul ab
-push acc	; Stack result low byte.
-push b		; Stack result high byte.
-mov a, r0	; Multiply XL x YH.
+push acc		; Stack result low byte.
+push b			; Stack result high byte.
+mov a, r0		; Multiply XL x YH.
 mov b, r3
 mul ab
-pop 18H		; Pop to R0.
-add a, r0	; Add result low byte to first result high byte.
+pop 0x18		; Pop to R0.
+add a, r0		; Add result low byte to first result high byte.
 mov r0, a
 clr a
-addc a, b	; Add carry to result high byte.
-mov dpl, a	; Store carried result high byte in DPL.
-mov a, r2	; Multiple XH x YL.
+addc a, b		; Add carry to result high byte.
+mov dpl, a		; Store carried result high byte in DPL.
+mov a, r2		; Multiple XH x YL.
 mov b, r1
 mul ab
-add a, r0	; Add result low byte to R0.
+add a, r0		; Add result low byte to R0.
 mov r0, a
 mov a, dpl
-addc a, b	; Add result high byte to DPL.
+addc a, b		; Add result high byte to DPL.
 mov dpl, a
 clr a
-addc a, #0	; Carry and save to R4.
+addc a, #0		; Carry and save to R4.
 mov r4, acc
-mov a, r3	; Multiply XH x Yh.
+mov a, r3		; Multiply XH x Yh.
 mov b, r1
 mul ab
-add a, dpl	; Add result low byte to DPL.
-mov r2, a	; Save product 3rd byte.
-mov acc, r4 ; Retrieve carry and add to result high byte.
+add a, dpl		; Add result low byte to DPL.
+mov r2, a		; Save product 3rd byte.
+mov acc, r4 	; Retrieve carry and add to result high byte.
 addc a, b
-mov r3, a	; Save product high byte.
-mov r1, 18H	; Save product second byte from R0.
-pop 18H		; Retrieve product low byte.
-pop dpl		; Restore registers.
+mov r3, a		; Save product high byte.
+mov r1, 0x18	; Save product second byte from R0.
+pop 0x18			; Retrieve product low byte.
+pop dpl			; Restore registers.
 pop b
 ret
 
