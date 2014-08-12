@@ -363,7 +363,7 @@ mov r2, a			; Pad gain to 16-bit precision.
 mov r3, #0x00
 mov r1, PEXH
 mov r0, PEXL
-lcall mul16			; And multiply with PEX.
+lcall MUL16			; And multiply with PEX.
 mov VELXL, r0		; Store result in VELX.
 mov VELXH, r1
 ret
