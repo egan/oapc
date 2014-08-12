@@ -402,16 +402,19 @@ ret
 
 ;====================================================================
 ; subroutine INTPAndFXCheck
-; 7. Interpolation Command and Update Final Position
+; 7. Motion Command Interpolation & Final Position Distance Update
 ;
-; inputs: DFXH, DFXL = DFX; FX4, FX3, FX2, FX1 = FX_i; INPOS
+; inputs: DFXH, DFXL = DFX; FX4, FX3, FX2, FX1 = FX_i; XGO
 ;
-; output: DXH, DXL = DX
-;         FX4, FX3, FX2, FX1 = FX_{i+1}
-;         XGO
+; output: FX4, FX3, FX2, FX1 = FX_{i+1}
+;         DXH, DXL = 0 if XGO = 0; else:
+;                  = DFX if FX_{i+1} >= 0
+;                  = FX_i otherwise
+;         XGO = 0 if FX_{i+1} < 0
+;             = 1 otherwise
 ;
 ; alters: register bank 3
-;***********************************************************************
+;====================================================================
 INTPAndFXCheck:
 jnb XGO, StopINTP	; If motion control is inactive, skip.
 mov r1, DFXH		; Otherwise, convert DFX to 24-bit precision.
