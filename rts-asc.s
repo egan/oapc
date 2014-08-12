@@ -128,19 +128,19 @@ ret					; Done.
 ;--------------------------------------------------------------------;
 ;====================================================================;
 org 0x9F50
-push b			; Save main arithmetic registers to stack.
+push b				; Save main arithmetic registers to stack.
 push acc
-orl psw, #0x18	; Use register bank 3 from now on.
-mov tl1, #0xE5	; Setup Timer 1 overflow period (10ms).
+orl psw, #0x18		; Use register bank 3 from now on.
+mov tl1, #0xE5		; Setup Timer 1 overflow period (10ms).
 mov th1, #0xBE
-push dpl		; Save data pointer registers to stack.
+push dpl			; Save data pointer registers to stack.
 push dph
 
 ;mov dptr, #0xFF00
 ;mov a, #0xFF
 ;movx @dptr, a
 
-mov dph, CNTH	; Increment timing counter.
+mov dph, CNTH		; Increment timing counter.
 mov dpl, CNTL
 inc dptr
 mov CNTH, dph
@@ -160,11 +160,11 @@ lcall INTPAndFXCheck	; Modules 7 and 8.
 ;movx @dptr, a
 
 done:
-pop dph			; Restore staced registers.
+pop dph				; Restore staced registers.
 pop dpl
 pop acc
 pop b
-pop psw			; XXX: Was PSW ever pushed to stack?
+pop psw				; PSW automatically pushed by monitor.
 reti
 
 ;====================================================================
@@ -328,7 +328,6 @@ ret
 ; inputs: XGO; INPOS
 ;
 ; output: INPOS
-;
 ;====================================================================
 INPOSJudge:
 jnb XGO, MCStop		; Is motion control active?
