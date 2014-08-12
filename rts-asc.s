@@ -404,10 +404,10 @@ ret
 ; subroutine INTPAndFXCheck
 ; 7. Interpolation Command and Update Final Position
 ;
-; inputs: DFXH, DFXL = DFX; FX4, FX3, FX2, FX1 = FX_{i-1}; INPOS
+; inputs: DFXH, DFXL = DFX; FX4, FX3, FX2, FX1 = FX_i; INPOS
 ;
 ; output: DXH, DXL = DX
-;         FX4, FX3, FX2, FX1 = FX_i
+;         FX4, FX3, FX2, FX1 = FX_{i+1}
 ;         XGO
 ;
 ; alters: register bank 3
@@ -429,16 +429,16 @@ mov FX1, r0
 sjmp FXCheckXGO
 
 FXCheckXGO:
-mov a, FX3			; Is FX negative?
-jb acc.7, CLRXGO	; If yes, we have past destination.
-mov DXH, DFXH		; If not, new DX is DFX.
+mov a, FX3			; Is predicted FX negative?
+jb acc.7, CLRXGO	; If yes, we will pass destination.
+mov DXH, DFXH		; If not, use standard DX DFX.
 mov DXL, DFXL
 ret					; Finish.
 
 CLRXGO:
-mov DXH, r5			; If past, DX is low bytes of FX... XXX?
+mov DXH, r5			; If will pass, DX is low bytes of FX... XXX?
 mov DXL, r4
-CLR XGO				; Stop motion control.
+clr XGO				; Will be done next interrupt.
 ret					; Finish.
 
 StopINTP:
