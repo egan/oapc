@@ -6,78 +6,78 @@
 ;====================================================================;
 
 ; System flags.
-XGO def 21H.0		; Motion start/stop flag.
-INPOS def 21H.1		; Servo lock flag.
-DATSAV def 21H.3
-MCDIR def 21H.4		; Motion direction flag.
-MSIGN0 def 21H.5	; Multiplicand sign flag.
-MSIGN1 def 21H.6	; Multiplier sign flag.
-MSIGNALL def 21H.7	; Product sign flag.
+XGO def 0x21.0		; Motion start/stop flag.
+INPOS def 0x21.1		; Servo lock flag.
+DATSAV def 0x21.3
+MCDIR def 0x21.4		; Motion direction flag.
+MSIGN0 def 0x21.5	; Multiplicand sign flag.
+MSIGN1 def 0x21.6	; Multiplier sign flag.
+MSIGNALL def 0x21.7	; Product sign flag.
 
 ; Timing counter value (16-bit).
-CNTL epz 23H
-CNTH epz 24H
+CNTL epz 0x23
+CNTH epz 0x24
 
 ; XXX: Buffer address value (16-bit).
-BUFF_ADRL def 4AH
-BUFF_ADRH def 4BH
+BUFF_ADRL def 0x4A
+BUFF_ADRH def 0x4B
 
 ; Velocity command value VELX (16-bit).
-VELXH epz 4CH
-VELXL epz 4DH
+VELXH epz 0x4C
+VELXL epz 0x4D
 
 ; Position increment/decrement DXC (16-bit).
-DXCH epz 4EH
-DXCL epz 4FH
+DXCH epz 0x4E
+DXCL epz 0x4F
 
 ; Up/Down counter value XC (16-bit).
-XCH epz 50H
-XCL epz 51H
+XCH epz 0x50
+XCL epz 0x51
 
 ; Position interpolation increment DFX (16-bit).
-DFXH epz 53H
-DFXL epz 52H
+DFXH epz 0x53
+DFXL epz 0x52
 
 ; Position following error PEX (16-bit).
-PEXH epz 54H
-PEXL epz 55H
+PEXH epz 0x54
+PEXL epz 0x55
 
 ; Residual distance to end position FX (32-bit).
-FX1 epz 56H
-FX2 epz 57H
-FX3 epz 58H
-FX4 epz 59H
+FX1 epz 0x56
+FX2 epz 0x57
+FX3 epz 0x58
+FX4 epz 0x59
 
 ; Proportional gains.
-KP epz 5AH		; During motion.
-KPINP epz 5BH	; Servo locked (in position).
+KP epz 0x5A		; During motion.
+KPINP epz 0x5B	; Servo locked (in position).
 
 ; Distance motion command per sampling period DX (16-bit).
-DXH epz 5EH
-DXL epz 5FH
+DXH epz 0x5E
+DXL epz 0x5F
 
 ; Absolute position counter value ABSX (32-bit).
-ABSX1 epz 60H
-ABSX2 epz 61H
-ABSX3 epz 62H
-ABSX4 epz 63H
+ABSX1 epz 0x60
+ABSX2 epz 0x61
+ABSX3 epz 0x62
+ABSX4 epz 0x63
 
 ; Miscellaneous Flags.
-RDABSEN epz 64H	; Enable updating software absolute position counter.
-INTCNT epz 65h
+RDABSEN epz 0x64	; Enable updating software absolute position counter.
+INTCNT epz 0x65
 
 ; Temporary variable (16-bit) for position inc/decrement calculation.
-DABSH epz 66H
-DABSL epz 67H
+DABSH epz 0x66
+DABSL epz 0x67
 
 ; Digital-Analog conversion and control addresses.
-_DA1_LOW equ 0FE18H
-_DA1_HIGH equ 0FE19H
-_DA_CNVT equ 0FE1FH
+_DA1_LOW equ 0xFE18
+_DA1_HIGH equ 0xFE19
+_DA_CNVT equ 0xFE1F
 
 ; Up/Down counter countrol addresses.
-_UDCNT1_LOW equ 0FF05H
-_UDCNT1_HIGH equ 0FF06H
+_UDCNT1_LOW equ 0xFF05
+_UDCNT1_HIGH equ 0xFF06
 
 ;====================================================================;
 ;--------------------------------------------------------------------;
