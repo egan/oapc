@@ -7,9 +7,9 @@
 
 ; System flags.
 XGO def 0x21.0		; Motion start/stop flag.
-INPOS def 0x21.1		; Servo lock flag.
+INPOS def 0x21.1	; Servo lock flag.
 DATSAV def 0x21.3
-MCDIR def 0x21.4		; Motion direction flag.
+MCDIR def 0x21.4	; Motion direction flag.
 MSIGN0 def 0x21.5	; Multiplicand sign flag.
 MSIGN1 def 0x21.6	; Multiplier sign flag.
 MSIGNALL def 0x21.7	; Product sign flag.
