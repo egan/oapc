@@ -417,16 +417,16 @@ ret
 ;====================================================================
 INTPAndFXCheck:
 jnb XGO, StopINTP	; If motion control is inactive, skip.
-mov r1, DFXH		; Otherwise, convert DFX to 24-bit precision.
+mov r1, DFXH		; Otherwise, convert DFX to 32-bit precision.
 mov r0, DFXL
-lcall C16toC24		; XXX: Why 24, not 32? Extra byte of FX!
-mov r7, FX4			; Subtract DFX from FX. (r6, r5, r4) - (r2, r1, r0)
+lcall C16toC32
+mov r7, FX4			; Subtract DFX from FX.
 mov r6, FX3
 mov r5, FX2
 mov r4, FX1
-lcall CSUB24
-mov FX4, r3			; Store result in FX. (r0, r1, r2)
-mov FX3, r2			; XXX: Where does r3 come from?
+lcall CSUB32
+mov FX4, r3			; Store result in FX.
+mov FX3, r2
 mov FX2, r1
 mov FX1, r0
 sjmp FXCheckXGO
