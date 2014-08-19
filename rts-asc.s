@@ -522,7 +522,6 @@ lcall Cr0r1		; Find magnitude and sign of multiplicand X.
 lcall Cr2r3		; Find magnitude and sign of multiplier Y.
 lcall UMUL16	; Perform unsigned multiplication of |X| x |Y|.
 lcall Mr0r3		; Find sign of product P.
-;lcall FRound
 ret
 
 ;====================================================================
@@ -838,48 +837,6 @@ mov a, r6	; Subtract high bytes with borrow.
 subb a, r2
 mov r2, a	; Save result in D high byte.
 mov C, OV	; Set carry if overflow occurred.
-ret
-
-;====================================================================
-; subroutine FRound
-; 32-bit Signed (2's Complement) Fixed Point Q24.8 Round
-;
-; XXX: As implemented now, it is Q16.8; no carry to r3 is performed.
-;
-; inputs: r3, r2, r1. r0 = X
-;
-; output: r3, r2, r1 = round(X)
-;         C is set if overflow occurs
-;
-; alters: acc, C, OV, register bank 3
-;====================================================================
-FRound:
-orl psw, #0x18
-clr C
-mov a, r3				; Check if positive.
-jnb acc.7, FRPositive
-mov a, r0				; Check if changing integer part is necessary.
-jb acc.7, FREND
-mov a, r1				; Round to next integer (negative).
-subb a, #1
-mov r1, a				; Store result low byte.
-mov a, r2				; Carry borrow to high byte.
-subb a, #0
-mov r2, a				; Store result high byte.
-sjmp FREND				; Done.
-
-FRPositive:
-mov a, r0				; Check if changing integer part is necessary.
-jnb acc.7, FREND
-mov a, r1				; Round to next integer (positive).
-addc a, #1
-mov r1, a				; Store result low byte.
-mov a, r2				; Carry to high byte.
-addc a, #0
-mov r2, a				; Store result high byte.
-
-FREND:
-clr C
 ret
 
 ; vim: filetype=tasm: tabstop=4:
