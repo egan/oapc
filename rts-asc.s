@@ -248,7 +248,8 @@ ret
 ; subroutine PosDiffCAL
 ; 2. Motion Inc/Decrement Calculation and Absolute Counter Update
 ;
-; inputs: XCH, XCL = XC; ABSX4, ABSX3, ABSX2, ABSX1 = ABSX
+; inputs: XCH, XCL = XC_i; r3, r2 = XC_{i-1};
+;         ABSX4, ABSX3, ABSX2, ABSX1 = ABSX
 ;
 ; output: DXCH, DXCL = DXC_i = XC_i - XC_{i-1}
 ;         If RDABSEN is not set:
