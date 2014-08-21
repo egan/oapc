@@ -3,7 +3,7 @@ Changes Since Provided Version
 Cosmetic:
 ---------
 * Cleaned up whitespace and indentation.
-* Added Vim modeline.
+* Added Vim mode line.
 * Renamed arithmetic routines for consistency.
 * Renamed data names for consistency.
 * Changed case of names, mnemonics for consistency.

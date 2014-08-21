@@ -75,7 +75,7 @@ _DA1_LOW equ 0xFE18
 _DA1_HIGH equ 0xFE19
 _DA_CNVT equ 0xFE1F
 
-; Up/Down counter countrol addresses.
+; Up/Down counter control addresses.
 _UDCNT1_LOW equ 0xFF05
 _UDCNT1_HIGH equ 0xFF06
 
@@ -124,7 +124,7 @@ ret					; Done.
 
 ;====================================================================;
 ;--------------------------------------------------------------------;
-;          REALTIME SYSTEM: Main code for timer interrupt.           ;
+;         REAL TIME SYSTEM: Main code for timer interrupt.           ;
 ;--------------------------------------------------------------------;
 ;====================================================================;
 org 0x9F50
@@ -160,7 +160,7 @@ lcall INTPAndFXCheck	; Modules 7 and 8.
 ;movx @dptr, a
 
 done:
-pop dph					; Restore staced registers.
+pop dph					; Restore stacked registers.
 pop dpl
 pop acc
 pop b
@@ -178,7 +178,7 @@ mov ABSX2, #0x00
 mov ABSX1, #0x00
 mov PEXH, #0x00		; Start position error PEX at 0.
 mov PEXL, #0x00
-mov DXH, #0x00		; Start distance motion commant at 0.
+mov DXH, #0x00		; Start distance motion command at 0.
 mov DXL, #0x00
 mov XCH, #0x00		; Start UDC value at 0.
 mov XCL, #0x00
@@ -565,7 +565,7 @@ mov dpl, a
 clr a
 addc a, #0		; Carry and save to R4.
 mov r4, acc
-mov a, r3		; Multiply XH x Yh.
+mov a, r3		; Multiply XH x YH.
 mov b, r1
 mul ab
 add a, dpl		; Add result low byte to DPL.
